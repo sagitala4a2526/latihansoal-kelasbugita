@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Latihan Soal PAI Online - Kelas 4A (Voice V2)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #1e293b;
+            color: white;
+            overflow-x: hidden;
+            user-select: none;
+            touch-action: manipulation;
+        }
+
+        /* Container Utama */
+        .slide-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+            text-align: center;
+            position: relative;
+        }
+
+        /* Typography */
+        .question-text {
+            font-size: 1.6rem;
+            line-height: 1.4;
+            margin: 1rem 0;
+            font-weight: 700;
+            color: #f8fafc;
+            max-width: 800px;
+        }
+
+        /* Grid Pilihan Jawaban */
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+            width: 100%;
+            max-width: 800px;
+            margin-bottom: 2rem; 
+        }
+
+        @media (min-width: 768px) {
+            .options-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .question-text {
+                font-size: 2.2rem;
+            }
+        }
+
+        .option-box {
+            background: white;
+            color: #0f172a;
+            padding: 1rem 1.2rem;
+            border-radius: 1rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-align: left;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            border-left: 8px solid #3b82f6;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.1s, background-color 0.2s;
+        }
+
+        .option-box:active {
+            transform: scale(0.98);
+            background-color: #e2e8f0;
+        }
+
+        .option-label {
+            background: #3b82f6;
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 12px;
+            font-weight: 800;
+            flex-shrink: 0;
+            font-size: 1rem;
+        }
+
+        /* Input Form & Card */
+        .card {
+            background: white;
+            color: #1e293b;
+            padding: 2rem;
+            border-radius: 1.5rem;
+            width: 95%;
+            max-width: 600px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+        }
+        
+        #studentName {
+            width: 100%;
+            padding: 1rem;
+            font-size: 1.5rem;
+            border: 3px solid #cbd5e1;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+            text-align: center;
+            font-weight: bold;
+            color: #3b82f6;
+        }
+
+        /* POPUP SKOR MELAYANG */
+        #score-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            font-size: 8rem;
+            font-weight: 900;
+            z-index: 9999;
+            pointer-events: none;
+            text-shadow: 4px 4px 0px #000;
+            opacity: 0;
+        }
+
+        .animate-pop {
+            animation: popUpAnim 0.8s ease-out forwards;
+        }
+
+        @keyframes popUpAnim {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+            30% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+            70% { transform: translate(-50%, -60%) scale(1); opacity: 1; }
+            100% { transform: translate(-50%, -100%) scale(0.5); opacity: 0; }
+        }
+
+        .hidden { display: none !important; }
+        
+        /* Loader */
+        .loader {
+            border: 8px solid #f3f3f3;
+            border-top: 8px solid #3b82f6;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 2s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Mute Button */
+        #voice-toggle {
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 12px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: background 0.3s;
+        }
+        #voice-toggle:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+    </style>
+</head>
+<body>
+
+    <audio id="sound-correct" src="https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3" preload="auto"></audio>
+    <audio id="sound-wrong" src="https://assets.mixkit.co/active_storage/sfx/2572/2572-preview.mp3" preload="auto"></audio>
+    <audio id="sound-finish" src="https://assets.mixkit.co/active_storage/sfx/2003/2003-preview.mp3" preload="auto"></audio>
+
+    <div id="score-popup"></div>
+
+    <div id="start-screen" class="slide-container">
+        <div class="card">
+            <h1 class="text-3xl font-extrabold text-blue-700 mb-2">LATIHAN SOAL PAI</h1>
+            <h2 class="text-xl font-bold text-gray-600 mb-1">KELAS 4A - ONLINE</h2>
+            <p class="text-sm text-gray-500 mb-6">Dilengkapi Pembaca Soal Otomatis</p>
+            
+            <label class="block text-lg font-bold">MASUKKAN NAMA LENGKAP:</label>
+            <input type="text" id="studentName" placeholder="Nama Siswa..." autocomplete="off">
+            
+            <button onclick="initQuiz()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl text-xl shadow-lg transition transform hover:scale-105 active:scale-95">
+                MULAI MENGERJAKAN
+            </button>
+            <p class="mt-4 text-xs text-red-500">*Aktifkan volume HP agar soal terdengar.</p>
+        </div>
+    </div>
+
+    <div id="quiz-screen" class="slide-container hidden">
+        <div class="top-bar w-full max-w-4xl flex justify-between items-center px-4 text-gray-300 text-sm md:text-lg mb-4">
+            <span id="display-name" class="font-bold text-white">Siswa: -</span>
+            
+            <div id="voice-toggle" onclick="toggleVoice()">
+                <span id="voice-status">🔊 Suara Soal: ON</span>
+            </div>
+            
+            <span id="question-counter">Soal 1 / 50</span>
+        </div>
+
+        <div class="w-full flex flex-col items-center mt-2">
+            <div id="category-badge" class="category-badge bg-indigo-600 px-4 py-1 rounded-full text-sm font-bold mb-4">Materi</div>
+            
+            <div id="question-text" class="question-text">
+                Pertanyaan akan muncul di sini...
+            </div>
+
+            <div class="options-grid" id="options-container">
+                </div>
+        </div>
+    </div>
+
+    <div id="end-screen" class="slide-container hidden">
+        <div class="card">
+            <h1 class="text-4xl font-extrabold text-blue-700 mb-4">SELESAI!</h1>
+            <p class="text-xl text-gray-600">Skor Akhir Kamu:</p>
+            
+            <div id="final-score-display" class="text-7xl font-black text-green-600 my-6">
+                0
+            </div>
+
+            <div id="upload-status">
+                <p class="text-gray-500">Mengirim nilai ke Bu Guru...</p>
+                <div class="loader"></div>
+            </div>
+            
+            <div id="upload-success" class="hidden">
+                <p class="text-green-600 font-bold text-xl mb-4">✅ Nilai Berhasil Terkirim!</p>
+                <button onclick="location.reload()" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-xl transition">
+                    Kerjakan Ulang
+                </button>
+            </div>
+             <div id="upload-error" class="hidden">
+                <p class="text-red-600 font-bold mb-4">⚠️ Gagal mengirim nilai. Screenshot layar ini dan kirim ke Guru.</p>
+                <button onclick="location.reload()" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-xl transition">
+                    Coba Lagi
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- KONFIGURASI GOOGLE SHEET ---
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzzzQYA7Ky9z16jLqwF40ANNbSIQE3fc5gydxdL8npM_nvlE-V7VIZN5yAinVu1N7dq/exec';
+
+        // --- DATA BANK SOAL ---
+        const rawQuestions = [
+            // 1. ASMAUL HUSNA
+            { c: "Asmaul Husna", q: "Apa arti dari Asmaul Husna 'Al-Malik'?", ans: "Yang Maha Raja", wr: ["Yang Maha Suci", "Yang Maha Sejahtera", "Yang Maha Pengaman"] },
+            { c: "Asmaul Husna", q: "Asmaul Husna 'Al-Aziz' artinya...", ans: "Yang Maha Mulia", wr: ["Yang Maha Raja", "Yang Maha Sejahtera", "Yang Maha Pencipta"] },
+            { c: "Asmaul Husna", q: "Allah SWT Maha Suci dari kekurangan. Ini arti dari...", ans: "Al-Quddus", wr: ["Al-Malik", "Al-Mu'min", "Al-Aziz"] },
+            { c: "Asmaul Husna", q: "As-Salam' memiliki arti Yang Maha...", ans: "Sejahtera", wr: ["Raja", "Suci", "Mulia"] },
+            { c: "Asmaul Husna", q: "Al-Mu'min artinya Yang Maha Memberi...", ans: "Keamanan", wr: ["Rezeki", "Kesehatan", "Kekayaan"] },
+
+            // 2. HIJRAH
+            { c: "Kisah Hijrah", q: "Secara bahasa, kata 'Hijrah' berarti...", ans: "Memutuskan atau Meninggalkan", wr: ["Berkunjung", "Berwisata", "Berjalan kaki"] },
+            { c: "Kisah Hijrah", q: "Nabi Muhammad SAW berhijrah dari Makkah ke...", ans: "Madinah", wr: ["Mesir", "Palestina", "Yaman"] },
+            { c: "Kisah Hijrah", q: "Nama kota Madinah sebelum Nabi datang adalah...", ans: "Yaśrib", wr: ["Thaif", "Syam", "Khaibar"] },
+            { c: "Kisah Hijrah", q: "Jarak perkiraan Makkah ke Madinah adalah...", ans: "450 km", wr: ["100 km", "250 km", "1000 km"] },
+            { c: "Kisah Hijrah", q: "Nabi hijrah karena tekanan dari kaum...", ans: "Kafir Quraisy", wr: ["Anshar", "Muhajirin", "Pedagang"] },
+            { c: "Kisah Hijrah", q: "Peristiwa janji setia penduduk Madinah disebut Baiat...", ans: "'Aqabah", wr: ["Ridwan", "Hudaibiyah", "Makkah"] },
+            { c: "Kisah Hijrah", q: "Perintah hijrah datang langsung dari...", ans: "Allah SWT", wr: ["Malaikat", "Ketua Suku", "Sahabat Nabi"] },
+            { c: "Kisah Hijrah", q: "Bagaimana sambutan penduduk Madinah kepada Nabi?", ans: "Sangat Gembira", wr: ["Menolak", "Marah", "Tidak Peduli"] },
+            { c: "Kisah Hijrah", q: "Menurut KBBI, hijrah dilakukan untuk...", ans: "Menyelamatkan diri", wr: ["Mencari harta", "Berperang", "Berlibur"] },
+            { c: "Kisah Hijrah", q: "Hijrah mengajarkan berpindah ke keadaan yang...", ans: "Lebih Baik", wr: ["Kaya Raya", "Terkenal", "Berkuasa"] },
+
+            // 3. BALIG FIKIH
+            { c: "Balig (Fikih)", q: "Secara bahasa, 'Balig' artinya...", ans: "Sampai", wr: ["Kuat", "Pintar", "Tinggi"] },
+            { c: "Balig (Fikih)", q: "Tanda balig utama anak laki-laki menurut fikih...", ans: "Mimpi basah", wr: ["Suara merdu", "Kulit halus", "Rambut panjang"] },
+            { c: "Balig (Fikih)", q: "Tanda balig bagi anak perempuan adalah...", ans: "Haid atau Menstruasi", wr: ["Keringat", "Air mata", "Air liur"] },
+            { c: "Balig (Fikih)", q: "Batas usia balig jika tidak mimpi basah atau haid...", ans: "15 Tahun", wr: ["10 Tahun", "12 Tahun", "17 Tahun"] },
+            { c: "Balig (Fikih)", q: "Orang yang mimpi basah disebut berhadas...", ans: "Besar", wr: ["Kecil", "Sedang", "Ringan"] },
+            { c: "Balig (Fikih)", q: "Cara bersuci dari hadas besar adalah...", ans: "Mandi Wajib", wr: ["Wudhu saja", "Cuci tangan", "Cuci muka"] },
+            { c: "Balig (Fikih)", q: "Orang dewasa yang wajib beribadah disebut...", ans: "Mukalaf", wr: ["Mualaf", "Musafir", "Munafik"] },
+
+            // 4. BALIG BIOLOGI
+            { c: "Balig (Biologi)", q: "Hormon yang memengaruhi perkembangan anak laki-laki adalah...", ans: "Testosteron", wr: ["Estrogen", "Progesteron", "Insulin"] },
+            { c: "Balig (Biologi)", q: "Hormon perkembangan anak perempuan adalah...", ans: "Estrogen & Progesteron", wr: ["Testosteron", "Adrenalin", "Tiroksin"] },
+            { c: "Balig (Biologi)", q: "Perubahan fisik laki-laki saat puber contohnya...", ans: "Tumbuh Jakun", wr: ["Pinggul membesar", "Suara melengking", "Kulit halus"] },
+            { c: "Balig (Biologi)", q: "Perubahan fisik perempuan saat puber contohnya...", ans: "Pinggul membesar", wr: ["Tumbuh kumis", "Suara berat", "Tumbuh jakun"] },
+            { c: "Balig (Biologi)", q: "Mental laki-laki balig cenderung berpikir...", ans: "Rasional", wr: ["Emosional", "Manja", "Sedih"] },
+            { c: "Balig (Biologi)", q: "Mental perempuan saat puber cenderung...", ans: "Ingin diperhatikan", wr: ["Cuek", "Kasar", "Pendiam"] },
+            { c: "Balig (Biologi)", q: "Peristiwa luruhnya sel telur yang tidak dibuahi disebut...", ans: "Menstruasi", wr: ["Ovulasi", "Fertilisasi", "Reproduksi"] },
+            { c: "Balig (Biologi)", q: "Siklus menstruasi rata-rata terjadi setiap...", ans: "28 Hari", wr: ["7 Hari", "14 Hari", "40 Hari"] },
+
+            // 5. KEWAJIBAN BALIG
+            { c: "Kewajiban Balig", q: "Ibadah tiang agama yang wajib bagi mukalaf...", ans: "Salat Fardu", wr: ["Sedekah", "Puasa Sunnah", "Umrah"] },
+            { c: "Kewajiban Balig", q: "Batas aurat laki-laki adalah antara...", ans: "Pusar sampai lutut", wr: ["Leher sampai kaki", "Pinggang sampai paha", "Bahu sampai lutut"] },
+            { c: "Kewajiban Balig", q: "Aurat perempuan seluruh tubuh KECUALI...", ans: "Wajah & Telapak Tangan", wr: ["Rambut & Leher", "Kaki & Tangan", "Wajah & Rambut"] },
+            { c: "Kewajiban Balig", q: "Hukum mencari ilmu bagi muslim adalah...", ans: "Wajib", wr: ["Sunnah", "Mubah", "Makruh"] },
+            { c: "Kewajiban Balig", q: "Perbuatan setelah balig akan mendapat...", ans: "Balasan (Pahala atau Dosa)", wr: ["Hadiah", "Pujian", "Uang"] },
+
+            // 6. AL HUJURAT 13
+            { c: "QS Al-Hujurat: 13", q: "Kami menciptakan kamu dari seorang laki-laki dan...", ans: "Seorang Perempuan", wr: ["Seorang Anak", "Seorang Teman", "Seorang Saudara"] },
+            { c: "QS Al-Hujurat: 13", q: "Manusia dijadikan bersuku-suku agar saling...", ans: "Mengenal", wr: ["Bermusuhan", "Bersaing", "Mengejek"] },
+            { c: "QS Al-Hujurat: 13", q: "Yang paling mulia di sisi Allah adalah yang...", ans: "Bertakwa", wr: ["Kaya", "Rupawan", "Kuat"] },
+            { c: "QS Al-Hujurat: 13", q: "Potongan ayat 'Inna Akromakum...' artinya...", ans: "Sesungguhnya yang paling mulia", wr: ["Sesungguhnya Allah Tahu", "Wahai Manusia", "Bersuku-suku"] },
+            { c: "QS Al-Hujurat: 13", q: "Allah bersifat Al-Alim dan Al-Khabir, artinya...", ans: "Maha Mengetahui & Teliti", wr: ["Maha Melihat & Mendengar", "Maha Pengasih & Penyayang", "Maha Raja & Suci"] },
+
+            // 7. KERAGAMAN SUNATULLAH
+            { c: "Sunatullah", q: "Apa arti dari 'Sunatullah'?", ans: "Ketentuan atau Hukum Allah", wr: ["Perintah Nabi", "Hukum Negara", "Adat Istiadat"] },
+            { c: "Sunatullah", q: "QS Ar-Rum ayat 22 menyebutkan perbedaan...", ans: "Bahasa & Warna Kulit", wr: ["Harta & Jabatan", "Rumah & Mobil", "Makanan & Minuman"] },
+            { c: "Sunatullah", q: "Sikap yang benar terhadap keragaman budaya...", ans: "Menghargai", wr: ["Mengejek", "Membenci", "Menjauhi"] },
+            { c: "Sunatullah", q: "Keragaman adalah anugerah agar hidup menjadi...", ans: "Indah & Harmonis", wr: ["Berantakan", "Membosankan", "Sulit"] },
+            { c: "Sunatullah", q: "Contoh keragaman alam di Indonesia...", ans: "Gunung & Laut", wr: ["Gedung tinggi", "Jalan raya", "Jembatan"] },
+
+            // 8. SALING MENGHARGAI
+            { c: "Saling Menghargai", q: "Sikap saat teman berbeda agama beribadah...", ans: "Menghormati", wr: ["Membuat gaduh", "Mengganggu", "Ikut ibadah"] },
+            { c: "Saling Menghargai", q: "Jika melihat teman dibully karena perbedaan...", ans: "Membela atau Lapor Guru", wr: ["Ikut mengejek", "Menertawakan", "Merekam video"] },
+            { c: "Saling Menghargai", q: "Tidak membeda-bedakan teman saat bermain adalah...", ans: "Toleransi", wr: ["Sombong", "Pilih kasih", "Egois"] },
+            { c: "Saling Menghargai", q: "Islam mengajarkan perbedaan adalah...", ans: "Rahmat", wr: ["Musibah", "Kesalahan", "Hukuman"] },
+            { c: "Saling Menghargai", q: "Manfaat hidup rukun dalam perbedaan...", ans: "Tercipta kedamaian", wr: ["Terjadi pertengkaran", "Hidup tidak tenang", "Dijauhi teman"] }
+        ];
+
+        // VARIABEL GLOBAL
+        let activeQuestions = [];
+        let currentIndex = 0;
+        let correctCount = 0;
+        let studentName = "";
+        let isAnsweringAllowed = true;
+        let isVoiceEnabled = true;
+
+        // Sound Elements
+        const soundCorrect = document.getElementById("sound-correct");
+        const soundWrong = document.getElementById("sound-wrong");
+        const soundFinish = document.getElementById("sound-finish");
+
+        // FUNGSI UTILITY: Shuffle
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex != 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        // --- TEXT TO SPEECH FUNCTIONS ---
+        function toggleVoice() {
+            isVoiceEnabled = !isVoiceEnabled;
+            const btn = document.getElementById("voice-status");
+            if (isVoiceEnabled) {
+                btn.innerText = "🔊 Suara Soal: ON";
+            } else {
+                btn.innerText = "🔇 Suara Soal: OFF";
+                window.speechSynthesis.cancel();
+            }
+        }
+
+        function speakQuestion(qText, options) {
+            if (!isVoiceEnabled) return;
+
+            // Hentikan suara sebelumnya (jika ada)
+            window.speechSynthesis.cancel();
+
+            const labels = ['A', 'B', 'C', 'D'];
+            
+            // Bangun kalimat untuk dibaca
+            let textToRead = `Soal nomor ${currentIndex + 1}. ${qText}. `;
+            
+            // Menambahkan opsi jawaban ke kalimat TANPA KATA "PILIHAN"
+            options.forEach((opt, idx) => {
+                textToRead += `${labels[idx]}. ${opt.text}. `;
+            });
+
+            // Setup Speech Utterance
+            const utterance = new SpeechSynthesisUtterance(textToRead);
+            utterance.lang = 'id-ID'; // Bahasa Indonesia
+            utterance.volume = 1.0;   // VOLUME MAKSIMAL (0.0 - 1.0)
+            utterance.rate = 0.9;     // Kecepatan
+            utterance.pitch = 1;
+
+            // LOGIKA PAKSA SUARA INDONESIA
+            // Mencari suara yang benar-benar ada kode "id" atau nama "Indonesia"
+            // agar tidak dibaca pakai logat Inggris di HP/Browser tertentu.
+            const voices = window.speechSynthesis.getVoices();
+            const indoVoice = voices.find(v => v.lang === 'id-ID' || v.lang === 'id_ID') || 
+                              voices.find(v => v.name.toLowerCase().includes('indonesia'));
+            
+            if (indoVoice) {
+                utterance.voice = indoVoice;
+            }
+
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // Pastikan voice list termuat (beberapa browser perlu trigger ini)
+        window.speechSynthesis.onvoiceschanged = () => {
+            window.speechSynthesis.getVoices();
+        };
+
+
+        // 1. INISIALISASI
+        function initQuiz() {
+            const inputName = document.getElementById("studentName").value;
+            if (inputName.trim() === "") {
+                alert("Harap tulis nama lengkap kamu dulu ya!");
+                return;
+            }
+            studentName = inputName;
+            document.getElementById("display-name").innerText = "Siswa: " + studentName;
+
+            // Persiapan Soal
+            const shuffledMaster = shuffle([...rawQuestions]);
+            activeQuestions = shuffledMaster.map((item, index) => {
+                let optionsArr = [
+                    { text: item.ans, isCorrect: true },
+                    { text: item.wr[0], isCorrect: false },
+                    { text: item.wr[1], isCorrect: false },
+                    { text: item.wr[2], isCorrect: false }
+                ];
+                optionsArr = shuffle(optionsArr);
+                return {
+                    id: index + 1,
+                    category: item.c,
+                    question: item.q,
+                    options: optionsArr
+                };
+            });
+
+            currentIndex = 0;
+            correctCount = 0;
+            
+            // UI Switch
+            document.getElementById("start-screen").classList.add("hidden");
+            document.getElementById("quiz-screen").classList.remove("hidden");
+            
+            // Init Voices First Time (hack for mobile)
+            window.speechSynthesis.getVoices();
+
+            renderSlide();
+        }
+
+        // 2. TAMPILKAN SOAL
+        function renderSlide() {
+            isAnsweringAllowed = true;
+            const currentData = activeQuestions[currentIndex];
+            const labels = ['A', 'B', 'C', 'D'];
+
+            document.getElementById("question-counter").innerText = `Soal ${currentIndex + 1} / ${activeQuestions.length}`;
+            document.getElementById("category-badge").innerText = currentData.category;
+            document.getElementById("question-text").innerText = `${currentData.question}`;
+
+            const container = document.getElementById("options-container");
+            container.innerHTML = "";
+            
+            currentData.options.forEach((opt, idx) => {
+                const box = document.createElement("div");
+                box.className = "option-box";
+                box.innerHTML = `
+                    <div class="option-label">${labels[idx]}</div>
+                    <span>${opt.text}</span>
+                `;
+                box.onclick = () => handleAnswer(opt.isCorrect, box);
+                container.appendChild(box);
+            });
+
+            // JALANKAN TTS (Baca Soal)
+            speakQuestion(currentData.question, currentData.options);
+        }
+
+        // 3. LOGIKA JAWAB & POPUP
+        function handleAnswer(isCorrect, element) {
+            if (!isAnsweringAllowed) return; 
+            isAnsweringAllowed = false;
+
+            // STOP SUARA SOAL KETIKA MENJAWAB
+            window.speechSynthesis.cancel();
+
+            // Visual Feedback di Tombol
+            if (isCorrect) {
+                element.style.backgroundColor = "#86efac"; 
+                element.style.borderColor = "#16a34a";
+                correctCount++;
+                showPopup(true);
+            } else {
+                element.style.backgroundColor = "#fca5a5"; 
+                element.style.borderColor = "#dc2626";
+                showPopup(false);
+            }
+
+            setTimeout(() => {
+                nextQuestion();
+            }, 300);
+        }
+
+        // 4. POPUP ANIMATION
+        function showPopup(isCorrect) {
+            const popup = document.getElementById('score-popup');
+            popup.classList.remove('animate-pop');
+            void popup.offsetWidth; 
+
+            if (isCorrect) {
+                popup.innerText = "+1";
+                popup.style.color = "#4ade80"; 
+                soundCorrect.currentTime = 0;
+                soundCorrect.play().catch(e => console.log("Audio play failed"));
+            } else {
+                popup.innerText = "0";
+                popup.style.color = "#ef4444"; 
+                soundWrong.currentTime = 0;
+                soundWrong.play().catch(e => console.log("Audio play failed"));
+            }
+
+            popup.classList.add('animate-pop');
+        }
+
+        // 5. NAVIGASI
+        function nextQuestion() {
+            if (currentIndex < activeQuestions.length - 1) {
+                currentIndex++;
+                renderSlide();
+            } else {
+                finishQuiz();
+            }
+        }
+
+        // 6. SELESAI & KIRIM DATA
+        function finishQuiz() {
+            window.speechSynthesis.cancel(); // Pastikan tidak ada suara tertinggal
+            document.getElementById("quiz-screen").classList.add("hidden");
+            document.getElementById("end-screen").classList.remove("hidden");
+
+            const finalScore = Math.round((correctCount / activeQuestions.length) * 100);
+            document.getElementById("final-score-display").innerText = finalScore;
+            
+            // Baca skor akhir
+            const msg = new SpeechSynthesisUtterance(`Alhamdulillah selesai. Skor kamu adalah ${finalScore}.`);
+            msg.lang = 'id-ID';
+            msg.volume = 1.0;
+            window.speechSynthesis.speak(msg);
+
+            soundFinish.play().catch(e => console.log("Audio play failed"));
+            sendDataToSheet(finalScore);
+        }
+
+        function sendDataToSheet(score) {
+            const formData = new FormData();
+            formData.append('nama', studentName);
+            formData.append('skor', score);
+
+            fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                body: formData,
+                mode: 'no-cors'
+            })
+            .then(() => {
+                document.getElementById("upload-status").classList.add("hidden");
+                document.getElementById("upload-success").classList.remove("hidden");
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById("upload-status").classList.add("hidden");
+                document.getElementById("upload-error").classList.remove("hidden");
+            });
+        }
+        
+        document.getElementById("studentName").addEventListener("keypress", function(e) {
+            if (e.key === "Enter") initQuiz();
+        });
+
+    </script>
+</body>
+</html>
