@@ -4,17 +4,70 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Latihan Soal PAI Online - Kelas 4A (Voice V2)</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
     <style>
+        /* Reset & Base Styles */
         body {
             font-family: 'Poppins', sans-serif;
-            background-color: #1e293b;
+            background-color: #1e293b; /* slate-800 */
             color: white;
             overflow-x: hidden;
             user-select: none;
             touch-action: manipulation;
+            margin: 0;
+            padding: 0;
         }
+
+        /* Utilitas Sembunyi */
+        .hidden { display: none !important; }
+        
+        /* Utility Styles - Ganti Tailwind */
+        .w-full { width: 100%; }
+        .max-w-4xl { max-width: 56rem; /* 896px */ }
+        .max-w-600px { max-width: 600px; }
+        .flex { display: flex; }
+        .flex-col { flex-direction: column; }
+        .justify-between { justify-content: space-between; }
+        .justify-center { justify-content: center; }
+        .items-center { align-items: center; }
+        .px-4 { padding-left: 1rem; padding-right: 1rem; }
+        .py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
+        .py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
+        .px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
+        .mt-2 { margin-top: 0.5rem; }
+        .mt-4 { margin-top: 1rem; }
+        .mb-2 { margin-bottom: 0.5rem; }
+        .mb-4 { margin-bottom: 1rem; }
+        .mb-6 { margin-bottom: 1.5rem; }
+        .text-xs { font-size: 0.75rem; }
+        .text-sm { font-size: 0.875rem; }
+        .text-base { font-size: 1rem; }
+        .text-lg { font-size: 1.125rem; }
+        .text-xl { font-size: 1.25rem; }
+        .text-3xl { font-size: 1.875rem; }
+        .text-4xl { font-size: 2.25rem; }
+        .text-7xl { font-size: 4.5rem; }
+        .font-extrabold { font-weight: 800; }
+        .font-bold { font-weight: 700; }
+        .font-black { font-weight: 900; }
+        .rounded-xl { border-radius: 0.75rem; }
+        .rounded-full { border-radius: 9999px; }
+        .transition { transition: all 0.2s ease-in-out; }
+        .text-white { color: white; }
+        .text-gray-300 { color: #d1d5db; }
+        .text-gray-500 { color: #6b7280; }
+        .text-gray-600 { color: #4b5563; }
+        .text-blue-700 { color: #1d4ed8; }
+        .text-green-600 { color: #10b981; }
+        .text-red-500 { color: #ef4444; }
+        .bg-blue-600 { background-color: #2563eb; }
+        .bg-indigo-600 { background-color: #4f46e5; }
+        .bg-gray-600 { background-color: #4b5563; }
+        .hover\:bg-blue-700:hover { background-color: #1d4ed8; }
+        .hover\:bg-gray-700:hover { background-color: #374151; }
+        .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
+        .active\:scale-95:active { transform: scale(0.95); }
+        .hover\:scale-105:hover { transform: scale(1.05); }
 
         /* Container Utama */
         .slide-container {
@@ -34,7 +87,7 @@
             line-height: 1.4;
             margin: 1rem 0;
             font-weight: 700;
-            color: #f8fafc;
+            color: #f8fafc; /* slate-50 */
             max-width: 800px;
         }
 
@@ -55,18 +108,21 @@
             .question-text {
                 font-size: 2.2rem;
             }
+            .text-md-lg { /* Pengganti md:text-lg */
+                font-size: 1.125rem;
+            }
         }
 
         .option-box {
             background: white;
-            color: #0f172a;
+            color: #0f172a; /* slate-900 */
             padding: 1rem 1.2rem;
             border-radius: 1rem;
             font-size: 1.1rem;
             font-weight: 600;
             text-align: left;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-            border-left: 8px solid #3b82f6;
+            border-left: 8px solid #3b82f6; /* blue-500 */
             display: flex;
             align-items: center;
             cursor: pointer;
@@ -75,11 +131,11 @@
 
         .option-box:active {
             transform: scale(0.98);
-            background-color: #e2e8f0;
+            background-color: #e2e8f0; /* slate-200 */
         }
 
         .option-label {
-            background: #3b82f6;
+            background: #3b82f6; /* blue-500 */
             color: white;
             width: 35px;
             height: 35px;
@@ -96,24 +152,24 @@
         /* Input Form & Card */
         .card {
             background: white;
-            color: #1e293b;
+            color: #1e293b; /* slate-800 */
             padding: 2rem;
             border-radius: 1.5rem;
             width: 95%;
             max-width: 600px;
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
         }
-        
+            
         #studentName {
             width: 100%;
             padding: 1rem;
             font-size: 1.5rem;
-            border: 3px solid #cbd5e1;
+            border: 3px solid #cbd5e1; /* slate-300 */
             border-radius: 0.5rem;
             margin: 1rem 0;
             text-align: center;
             font-weight: bold;
-            color: #3b82f6;
+            color: #3b82f6; /* blue-500 */
         }
 
         /* POPUP SKOR MELAYANG */
@@ -141,8 +197,6 @@
             100% { transform: translate(-50%, -100%) scale(0.5); opacity: 0; }
         }
 
-        .hidden { display: none !important; }
-        
         /* Loader */
         .loader {
             border: 8px solid #f3f3f3;
@@ -197,7 +251,7 @@
     </div>
 
     <div id="quiz-screen" class="slide-container hidden">
-        <div class="top-bar w-full max-w-4xl flex justify-between items-center px-4 text-gray-300 text-sm md:text-lg mb-4">
+        <div class="top-bar w-full max-w-4xl flex justify-between items-center px-4 text-gray-300 text-sm text-md-lg mb-4">
             <span id="display-name" class="font-bold text-white">Siswa: -</span>
             
             <div id="voice-toggle" onclick="toggleVoice()">
@@ -572,4 +626,3 @@
     </script>
 </body>
 </html>
-
