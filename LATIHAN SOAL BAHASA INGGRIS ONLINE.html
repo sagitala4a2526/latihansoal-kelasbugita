@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Latihan Soal Bahasa Inggris 4A</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #d35400;
+            --correct: #27ae60;
+            --wrong: #c0392b;
+            --bg-body: #f0f2f5;
+            --label-color: #e67e22;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Verdana, sans-serif;
+            background-color: var(--bg-body);
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        /* HEADER */
+        header {
+            background-color: #ffffff;
+            padding: 8px 15px;
+            border-bottom: 4px solid var(--accent);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .header-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-info {
+            line-height: 1.2;
+        }
+
+        .h-title {
+            color: var(--primary);
+            font-size: 1rem;
+            font-weight: 800;
+            margin: 0;
+        }
+        
+        .h-sub {
+            font-size: 0.75rem;
+            color: #555;
+            font-weight: 600;
+        }
+
+        /* TOMBOL TTS */
+        .tts-toggle-btn {
+            background: #e1e1e1;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+        .tts-active { background: var(--correct); color: white; }
+        .tts-inactive { background: var(--wrong); color: white; }
+
+        .progress-container { height: 5px; background: #ddd; width: 100%; position: absolute; bottom: 0; left: 0; }
+        .progress-fill { height: 100%; background: var(--accent); width: 0%; transition: width 0.3s; }
+
+        /* MAIN AREA */
+        #app-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+            position: relative;
+        }
+
+        .card {
+            background: white;
+            width: 100%;
+            max-width: 600px;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            text-align: center;
+            display: none;
+            animation: fadeIn 0.5s;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+        .card.active { display: block; }
+
+        /* STYLE KHUSUS INFO GURU DI START SCREEN */
+        .school-badge {
+            background: #ecf0f1;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px dashed var(--primary);
+        }
+        .school-name { font-weight: bold; color: var(--primary); font-size: 1.1rem; }
+        .teacher-name { color: var(--accent); font-weight: bold; margin-top: 5px; font-size: 0.95rem; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* INPUT FORM */
+        .input-group { margin-bottom: 15px; text-align: left; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: var(--primary); }
+        input[type="text"] {
+            width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 10px;
+            font-size: 1rem; box-sizing: border-box; transition: 0.3s;
+        }
+        input[type="text"]:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 5px rgba(211, 84, 0, 0.3); }
+
+        .btn-start {
+            background: var(--accent); color: white; border: none; padding: 15px 40px;
+            font-size: 1.1rem; border-radius: 50px; cursor: pointer; font-weight: bold;
+            width: 100%; margin-top: 10px; transition: transform 0.2s; box-shadow: 0 4px 0 #a04000;
+        }
+        .btn-start:active { transform: scale(0.95); box-shadow: none; transform: translateY(4px); }
+
+        /* QUESTION STYLES */
+        .q-num { font-size: 0.9rem; color: #7f8c8d; margin-bottom: 5px; font-weight: bold; text-align: right; }
+        
+        .q-image-container {
+            margin: 10px auto;
+            width: 100%;
+            display: none; 
+            background: #fff;
+            padding: 5px;
+            min-height: 100px;
+        }
+        .q-image {
+            max-width: 100%;
+            max-height: 200px; /* Sedikit diperkecil agar muat di HP */
+            width: auto;
+            border-radius: 8px;
+            object-fit: contain;
+            display: block;
+            margin: 0 auto;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .q-text { font-size: 1.2rem; color: var(--primary); font-weight: bold; margin-bottom: 20px; line-height: 1.4; }
+        .q-translation { color: #7f8c8d; font-size: 0.85em; font-weight: normal; display: block; margin-top: 5px; font-style: italic; }
+
+        /* OPTIONS GRID - UPDATED FOR LABELS */
+        .options-grid { display: grid; grid-template-columns: 1fr; gap: 10px; } /* 1 Kolom di HP lebih rapi untuk teks panjang */
+        
+        @media (min-width: 500px) {
+             .options-grid { grid-template-columns: 1fr 1fr; }
+        }
+
+        .opt-btn {
+            background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 12px;
+            padding: 12px 15px; font-size: 1rem; font-weight: 600; color: #333;
+            cursor: pointer; transition: all 0.2s; 
+            display: flex; align-items: center; justify-content: flex-start; /* Rata Kiri */
+            min-height: 45px; position: relative;
+            text-align: left;
+        }
+        .opt-btn:active { background: #e2e6ea; transform: scale(0.98); }
+
+        /* Label Huruf A, B, C, D */
+        .opt-label {
+            background-color: var(--primary);
+            color: white;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+        
+        .opt-text { flex: 1; }
+
+        /* POPUP FEEDBACK */
+        #feedback-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 1000;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .feedback-item {
+            font-size: 6rem; font-weight: 900;
+            text-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            opacity: 0;
+            position: absolute;
+        }
+        .fb-correct { color: var(--correct); }
+        .fb-wrong { color: var(--wrong); }
+
+        @keyframes floatUpFade {
+            0% { opacity: 1; transform: scale(0.5) translateY(50px); }
+            50% { opacity: 1; transform: scale(1.2) translateY(0); }
+            100% { opacity: 0; transform: scale(1.5) translateY(-100px); }
+        }
+        .animate-feedback { animation: floatUpFade 0.8s ease-out forwards; }
+
+        /* RESULT SCREEN */
+        .score-circle {
+            width: 120px; height: 120px; background: var(--primary); color: white;
+            border-radius: 50%; display: flex; justify-content: center; align-items: center;
+            font-size: 2.5rem; font-weight: bold; margin: 20px auto;
+            border: 5px solid var(--accent);
+        }
+        .status-msg { margin-top: 20px; font-weight: bold; color: #7f8c8d; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-top">
+            <div class="header-info">
+                <div class="h-title">LATIHAN SOAL B.INGGRIS</div>
+                <div class="h-sub">SDN KARANGSAMBUNG 03</div>
+            </div>
+            <button id="tts-btn" class="tts-toggle-btn tts-active" onclick="toggleTTS()">
+                🔊 ON
+            </button>
+        </div>
+        <div style="position:relative; height:5px; margin-top:5px;">
+            <div class="progress-container"><div class="progress-fill" id="progress"></div></div>
+        </div>
+    </header>
+
+    <div id="app-container">
+        <div id="start-screen" class="card active">
+            <h2 style="color:var(--primary); margin-bottom:10px;">SELAMAT DATANG</h2>
+            
+            <div class="school-badge">
+                <div class="school-name">KELAS 4A SDN KARANGSAMBUNG 03</div>
+                <div class="teacher-name">WALI KELAS: SITI ARUM GITA NURMALA</div>
+            </div>
+
+            <p style="color:#7f8c8d; margin-bottom:15px; font-size:0.9rem;">Masukkan nama lengkap untuk memulai kuis.</p>
+            <div class="input-group">
+                <label>Nama Siswa:</label>
+                <input type="text" id="studentName" placeholder="Ketik namamu disini..." autocomplete="off">
+            </div>
+            <button class="btn-start" onclick="startQuiz()">MULAI KUIS</button>
+        </div>
+
+        <div id="quiz-screen" class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-size:0.8rem; font-weight:bold; color:var(--accent);">Kelas 4A</span>
+                <div class="q-num" id="q-number">Soal 1/50</div>
+            </div>
+            
+            <div class="q-image-container" id="q-img-wrap">
+                <img src="" alt="Soal" class="q-image" id="q-img-el">
+            </div>
+
+            <div class="q-text" id="q-content">Loading...</div>
+            <div class="options-grid" id="opt-container"></div>
+        </div>
+
+        <div id="result-screen" class="card">
+            <h2 style="color:var(--primary)">KUIS SELESAI</h2>
+            <div class="school-badge" style="padding:10px; margin-bottom:10px;">
+                <div style="font-size:0.9rem; font-weight:bold;">SDN KARANGSAMBUNG 03</div>
+            </div>
+            <div class="score-circle" id="final-score">0</div>
+            <p>Hebat! <span id="display-name" style="font-weight:bold; color:var(--accent); font-size:1.2rem;"></span></p>
+            <div id="status-text" class="status-msg">Mengirim nilai ke server...</div>
+            <button class="btn-start" onclick="location.reload()" style="margin-top:20px; background:#7f8c8d;">Ulangi Kuis</button>
+        </div>
+    </div>
+
+    <div id="feedback-overlay"></div>
+
+    <audio id="sfx-correct" src="https://cdn.pixabay.com/download/audio/2021/08/04/audio_bb630cc098.mp3?filename=short-success-sound-glockenspiel-treasure-video-game-6346.mp3"></audio>
+    <audio id="sfx-wrong" src="https://cdn.pixabay.com/download/audio/2022/03/10/audio_c8c8a73467.mp3?filename=wrong-answer-129254.mp3"></audio>
+
+    <script>
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw_uBg0Qw0XguV9UXtQHEwadniKGba6Mwu_BC5rc97j8qZXTqetgjcQsI0SEiFbGq1u/exec';
+        
+        // --- DATA SOAL ASLI (BELUM DIACAK) ---
+        const originalQuizData = [
+            { 
+                q: "What colour is a banana? (Apa warna pisang?)", 
+                img: "https://images.pexels.com/photos/2872755/pexels-photo-2872755.jpeg?auto=compress&cs=tinysrgb&w=400", 
+                a: "Yellow", b: "Red", c: "Blue", d: "Purple", key: "A" 
+            },
+            { q: "Apa bahasa Inggris dari 'Merah'?", a: "Green", b: "Red", c: "White", d: "Black", key: "B" },
+            { 
+                q: "The sky is ... (Langit itu berwarna ...)", 
+                img: "https://images.pexels.com/photos/531756/pexels-photo-531756.jpeg?auto=compress&cs=tinysrgb&w=400",
+                a: "Red", b: "Green", c: "Blue", d: "Yellow", key: "C" 
+            },
+            { q: "Mix Red and Yellow makes ... (Campuran Merah dan Kuning menjadi ...)", a: "Purple", b: "Green", c: "Orange", d: "Pink", key: "C" },
+            { 
+                q: "What colour is the grass? (Apa warna rumput?)", 
+                img: "https://upload.wikimedia.org/wikipedia/commons/b/ba/Closeup_of_lawn_grass.jpg",
+                a: "Blue", b: "Red", c: "Green", d: "Black", key: "C" 
+            },
+            { 
+                q: "Apa warna dari 'Chocolate'?", 
+                img: "https://images.pexels.com/photos/65882/chocolate-dark-coffee-confiserie-65882.jpeg?auto=compress&cs=tinysrgb&w=400",
+                a: "Brown", b: "Grey", c: "Pink", d: "White", key: "A" 
+            },
+            { q: "Bentuk dari bola adalah ...", a: "Square", b: "Triangle", c: "Circle", d: "Star", key: "C" },
+            { q: "What shape has 4 equal sides? (Bentuk apa yang punya 4 sisi sama?)", a: "Rectangle", b: "Square", c: "Circle", d: "Oval", key: "B" },
+            { q: "Bahasa Inggris 'Segitiga' adalah ...", a: "Triangle", b: "Square", c: "Diamond", d: "Heart", key: "A" },
+            { q: "The shape of an egg is ... (Bentuk telur adalah ...)", a: "Circle", b: "Oval", c: "Star", d: "Box", key: "B" },
+            { q: "Box usually looks like a ... (Kotak biasanya terlihat seperti ...)", a: "Circle", b: "Triangle", c: "Square", d: "Star", key: "C" },
+            { q: "Diamond shape is like a ... (Bentuk wajik itu seperti ...)", a: "Kite", b: "Ball", c: "Book", d: "Door", key: "A" },
+            { q: "Bahasa Inggris 'Boneka' adalah ...", a: "Ball", b: "Doll", c: "Robot", d: "Kite", key: "B" },
+            { 
+                q: "I play with a ... (Saya bermain dengan ...)", 
+                img: "https://chanelmuslim.com/wp-content/uploads/2021/07/ilustrsi-layangan-e1625808281423.png",
+                a: "Bike", b: "Car", c: "Kite", d: "Yo-yo", key: "C" 
+            },
+            { q: "Boys usually like to play ... (Anak laki-laki biasanya suka bermain ...)", a: "Doll", b: "Robot", c: "Cooking", d: "Flower", key: "B" },
+            { q: "What is 'Mobil-mobilan' in English?", a: "Toy Car", b: "Bike", c: "Plane", d: "Ship", key: "A" },
+            { 
+                q: "You ride a ... (Kamu mengendarai ...)", 
+                img: "https://images.pexels.com/photos/100582/pexels-photo-100582.jpeg?auto=compress&cs=tinysrgb&w=400",
+                a: "Ball", b: "Bike", c: "Doll", d: "Teddy Bear", key: "B" 
+            },
+            { q: "Marble artinya ...", a: "Kelereng", b: "Bola", c: "Gasing", d: "Kartu", key: "A" },
+            { q: "Sugar is ... (Gula rasanya ...)", a: "Sour", b: "Salty", c: "Sweet", d: "Bitter", key: "C" },
+            { q: "Lemon is ... (Lemon rasanya ...)", a: "Sweet", b: "Sour", c: "Bitter", d: "Hot", key: "B" },
+            { q: "Coffee without sugar is ... (Kopi tanpa gula rasanya ...)", a: "Sweet", b: "Salty", c: "Bitter", d: "Sour", key: "C" },
+            { q: "Rocks are ... (Batu itu ...)", a: "Soft", b: "Hard", c: "Fluffy", d: "Wet", key: "B" },
+            { q: "Cotton is ... (Kapas itu ...)", a: "Hard", b: "Soft", c: "Rough", d: "Sharp", key: "B" },
+            { q: "Salt is ... (Garam rasanya ...)", a: "Sweet", b: "Salty", c: "Spicy", d: "Plain", key: "B" },
+            { 
+                q: "I eat ... for breakfast (Saya makan ... untuk sarapan)", 
+                img: "https://images.pexels.com/photos/209206/pexels-photo-209206.jpeg?auto=compress&cs=tinysrgb&w=400",
+                a: "Rice", b: "Noodle", c: "Bread", d: "Soup", key: "C" 
+            },
+            { q: "What do you drink in the morning? (Apa yang kamu minum pagi hari?)", a: "Milk", b: "Pizza", c: "Burger", d: "Cake", key: "A" },
+            { q: "Nasi Goreng in English is ...", a: "Boiled Rice", b: "Fried Rice", c: "Sticky Rice", d: "Rice Cake", key: "B" },
+            { q: "Chicken Porridge artinya ...", a: "Bubur Ayam", b: "Ayam Goreng", c: "Sup Ayam", d: "Sate Ayam", key: "A" },
+            { 
+                q: "I have an ... (Saya makan sebuah ...)", 
+                img: "https://images.pexels.com/photos/162712/egg-white-food-protein-162712.jpeg?auto=compress&cs=tinysrgb&w=400",
+                a: "Apple", b: "Egg", c: "Ice Cream", d: "Orange", key: "B" 
+            },
+            { q: "Bahasa Inggris 'Sarapan' adalah ...", a: "Lunch", b: "Dinner", c: "Breakfast", d: "Supper", key: "C" },
+            { q: "Monkey likes to eat ... (Monyet suka makan ...)", a: "Apple", b: "Banana", c: "Grape", d: "Melon", key: "B" },
+            { q: "Bahasa Inggris 'Ayam' adalah ...", a: "Fish", b: "Duck", c: "Chicken", d: "Bird", key: "C" },
+            { q: "Meatball artinya ...", a: "Mie Ayam", b: "Bakso", c: "Soto", d: "Sate", key: "B" },
+            { q: "It is a fruit. It is red. (Ini buah. Warnanya merah.)", a: "Banana", b: "Apple", c: "Lemon", d: "Orange", key: "B" },
+            { q: "I am thirsty. I need ... (Saya haus. Saya butuh ...)", a: "Water", b: "Bread", c: "Cake", d: "Rice", key: "A" },
+            { q: "Noodle artinya ...", a: "Nasi", b: "Roti", c: "Mie", d: "Kue", key: "C" },
+            { q: "Jam 02.30 in English is ...", a: "It is half past two", b: "It is two o'clock", c: "It is half past three", d: "It is thirty two", key: "A" },
+            { q: "It is half past ten. (Jam berapa ini?)", a: "10.00", b: "10.30", c: "09.30", d: "11.30", key: "B" },
+            { q: "What time is 05.30? (Jam berapakah 05.30?)", a: "Half past four", b: "Half past six", c: "Half past five", d: "Five o'clock", key: "C" },
+            { 
+                q: "Jarum panjang di angka 6. Jarum pendek di antara 8 dan 9. It is ...", 
+                img: "https://st3.depositphotos.com/1005893/31903/i/450/depositphotos_319035938-stock-photo-analog-clock.jpg",
+                a: "Half past eight", b: "Half past nine", c: "Eight o'clock", d: "Nine o'clock", key: "A" 
+            },
+            { q: "Half past one is ... (Half past one adalah ...)", a: "01.00", b: "12.30", c: "01.30", d: "02.30", key: "C" },
+            { q: "Bahasa Inggris angka 11 adalah ...", a: "Ten", b: "Eleven", c: "Twelve", d: "One", key: "B" },
+            { q: "Twelve is number ... (Twelve adalah angka ...)", a: "10", b: "11", c: "12", d: "20", key: "C" },
+            { q: "1, 2, 3, ... , 5. The missing number is ... (Angka yang hilang adalah ...)", a: "Four", b: "Six", c: "Seven", d: "Eight", key: "A" },
+            { q: "What is 5 + 2? (Berapa 5 ditambah 2?)", a: "Six", b: "Seven", c: "Eight", d: "Nine", key: "B" },
+            { q: "Bahasa Inggris dari 8 adalah ...", a: "Eight", b: "Nine", c: "Ten", d: "Seven", key: "A" },
+            { q: "I ... at 06.00 (Saya pergi ke sekolah)", a: "Wake up", b: "Go to school", c: "Have breakfast", d: "Take a bath", key: "B" },
+            { q: "Bahasa Inggris 'Bangun Tidur' adalah ...", a: "Wake up", b: "Sleep", c: "Go home", d: "Play", key: "A" },
+            { q: "I eat bread for ... (Saya makan roti untuk ...)", a: "Dinner", b: "Lunch", c: "Breakfast", d: "Supper", key: "C" },
+            { 
+                q: "Before praying, I ... (Sebelum sholat, saya mandi)", 
+                img: "https://img.pikbest.com/png-images/20240930/a-kid-taking-bath-cartoon-art-_10911343.png!w700wp",
+                a: "Take a bath", b: "Watch TV", c: "Read a book", d: "Sleep", key: "A" 
+            }
+        ];
+
+        // VARIABLES
+        let activeQuizData = [];
+        let currentIdx = 0;
+        let score = 0;
+        let isAnswering = false; 
+        let studentName = "";
+        let ttsEnabled = true;
+        const pointsPerQuestion = 2;
+        let availableVoices = [];
+
+        // --- HELPER: SHUFFLE ARRAY ---
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // --- SISTEM TTS ---
+        function loadVoices() {
+            availableVoices = window.speechSynthesis.getVoices();
+        }
+        window.speechSynthesis.onvoiceschanged = loadVoices;
+
+        function getSmartVoice(langCode) {
+            const isIndo = langCode.includes('id') || langCode.includes('ind');
+            let candidates = availableVoices.filter(v => {
+                if(isIndo) return v.lang.includes('id') || v.lang.includes('ID') || v.lang.includes('ind');
+                return v.lang.includes('en'); 
+            });
+
+            let best = candidates.find(v => v.name.includes('Google'));
+            if (!best && isIndo) best = candidates.find(v => v.name.toLowerCase().includes('indonesia'));
+            if (!best) best = candidates[0];
+            return best;
+        }
+
+        function parseQuestion(text) {
+            const regex = /^(.*?)\s*(?:\((.*?)\))?$/;
+            const match = text.match(regex);
+            if (match) {
+                return {
+                    en: match[1] ? match[1].trim() : text, 
+                    id: match[2] ? match[2].trim() : ""
+                };
+            }
+            return { en: text, id: "" };
+        }
+
+        function speakQueue(queue, index = 0) {
+            if (!ttsEnabled || index >= queue.length) return;
+
+            const item = queue[index];
+            if (!item.text || item.text.trim() === "") {
+                speakQueue(queue, index + 1);
+                return;
+            }
+
+            const utterance = new SpeechSynthesisUtterance(item.text);
+            const voice = getSmartVoice(item.lang);
+            if (voice) utterance.voice = voice;
+            utterance.rate = (item.lang === 'en-US') ? 0.8 : 1.0; 
+            utterance.pitch = 1.0;
+
+            utterance.onend = function() {
+                speakQueue(queue, index + 1);
+            };
+
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function readQuestionSmart(item, shuffledOptions) {
+            if (!ttsEnabled) return;
+            window.speechSynthesis.cancel();
+
+            const parsed = parseQuestion(item.q);
+            const speechQueue = [];
+
+            speechQueue.push({ text: "Question", lang: "en-US" });
+            if (parsed.en) speechQueue.push({ text: parsed.en, lang: "en-US" });
+            if (parsed.id) speechQueue.push({ text: parsed.id, lang: "id-ID" });
+
+            // Baca opsi
+            const labels = ['A', 'B', 'C', 'D'];
+            shuffledOptions.forEach((opt, idx) => {
+                // speechQueue.push({ text: labels[idx], lang: "id-ID" }); // Optional: Read "A", "B"
+                speechQueue.push({ text: opt.text, lang: "en-US" });
+            });
+
+            speakQueue(speechQueue, 0);
+        }
+
+        function stopSpeech() {
+            window.speechSynthesis.cancel();
+        }
+
+        function toggleTTS() {
+            ttsEnabled = !ttsEnabled;
+            const btn = document.getElementById('tts-btn');
+            if (ttsEnabled) {
+                btn.className = "tts-toggle-btn tts-active";
+                btn.innerText = "🔊 ON";
+            } else {
+                stopSpeech();
+                btn.className = "tts-toggle-btn tts-inactive";
+                btn.innerText = "🔇 OFF";
+            }
+        }
+
+        // --- LOGIKA KUIS ---
+        function startQuiz() {
+            loadVoices(); 
+            const nameInput = document.getElementById('studentName').value.trim();
+            if (nameInput === "") {
+                alert("Mohon isi NAMA SISWA terlebih dahulu!");
+                return;
+            }
+            studentName = nameInput;
+
+            activeQuizData = JSON.parse(JSON.stringify(originalQuizData));
+            shuffleArray(activeQuizData);
+
+            document.getElementById('start-screen').classList.remove('active');
+            document.getElementById('quiz-screen').classList.add('active');
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            const item = activeQuizData[currentIdx];
+            document.getElementById('q-number').innerText = `Soal ${currentIdx + 1}/${activeQuizData.length}`;
+            
+            const imgWrap = document.getElementById('q-img-wrap');
+            const imgEl = document.getElementById('q-img-el');
+            
+            if (item.img) {
+                imgEl.src = item.img;
+                imgWrap.style.display = 'block';
+                imgEl.style.display = 'block'; 
+            } else {
+                imgWrap.style.display = 'none';
+                imgEl.src = '';
+            }
+
+            let formattedText = item.q.replace(/\((.*?)\)/g, '<br><span class="q-translation">($1)</span>');
+            document.getElementById('q-content').innerHTML = formattedText;
+
+            const percent = ((currentIdx) / activeQuizData.length) * 100;
+            document.getElementById('progress').style.width = percent + "%";
+
+            // RENDER OPSI
+            const optContainer = document.getElementById('opt-container');
+            optContainer.innerHTML = '';
+
+            let currentOptions = [
+                { id: 'A', text: item.a },
+                { id: 'B', text: item.b },
+                { id: 'C', text: item.c },
+                { id: 'D', text: item.d }
+            ];
+
+            shuffleArray(currentOptions);
+
+            const labelList = ['A', 'B', 'C', 'D']; // Label untuk tampilan
+
+            currentOptions.forEach((opt, index) => {
+                const btn = document.createElement('div');
+                btn.className = 'opt-btn';
+                // Tambahkan Label A, B, C, D
+                btn.innerHTML = `<div class="opt-label">${labelList[index]}</div> <div class="opt-text">${opt.text}</div>`;
+                
+                btn.onclick = () => checkAnswer(opt.id, btn);
+                optContainer.appendChild(btn);
+            });
+
+            isAnswering = false;
+            setTimeout(() => {
+                readQuestionSmart(item, currentOptions);
+            }, 600);
+        }
+
+        function checkAnswer(selectedOptID, btnElement) {
+            if(isAnswering) return;
+            isAnswering = true;
+            stopSpeech();
+
+            const correctKey = activeQuizData[currentIdx].key;
+            const isCorrect = selectedOptID === correctKey;
+
+            btnElement.style.background = isCorrect ? '#d4edda' : '#f8d7da';
+            btnElement.style.borderColor = isCorrect ? '#c3e6cb' : '#f5c6cb';
+
+            // Ubah warna label juga
+            const labelEl = btnElement.querySelector('.opt-label');
+            if(labelEl) {
+                labelEl.style.backgroundColor = isCorrect ? 'var(--correct)' : 'var(--wrong)';
+            }
+
+            if (isCorrect) {
+                score += pointsPerQuestion;
+                showFeedback(true);
+            } else {
+                showFeedback(false);
+            }
+
+            setTimeout(() => {
+                currentIdx++;
+                if (currentIdx < activeQuizData.length) {
+                    renderQuestion();
+                } else {
+                    finishQuiz();
+                }
+            }, 500); // Sedikit diperlambat agar siswa sempat lihat jawaban
+        }
+
+        function showFeedback(isCorrect) {
+            const overlay = document.getElementById('feedback-overlay');
+            const el = document.createElement('div');
+            el.className = `feedback-item animate-feedback ${isCorrect ? 'fb-correct' : 'fb-wrong'}`;
+            // Simbol Centang atau Silang
+            el.innerText = isCorrect ? "✔" : "✘";
+            overlay.innerHTML = ''; 
+            overlay.appendChild(el);
+
+            const audio = document.getElementById(isCorrect ? 'sfx-correct' : 'sfx-wrong');
+            audio.currentTime = 0;
+            audio.play().catch(() => {});
+        }
+
+        function finishQuiz() {
+            stopSpeech();
+            document.getElementById('quiz-screen').classList.remove('active');
+            document.getElementById('result-screen').classList.add('active');
+            document.getElementById('progress').style.width = "100%";
+            document.getElementById('final-score').innerText = score;
+            document.getElementById('display-name').innerText = studentName;
+            sendDataToSheet();
+        }
+
+        function sendDataToSheet() {
+            const formData = new FormData();
+            formData.append('nama', studentName);
+            formData.append('kelas', '4A'); 
+            formData.append('skor', score);
+            formData.append('waktu', new Date().toLocaleString());
+
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                body: formData,
+                mode: 'no-cors' 
+            })
+            .then(() => {
+                document.getElementById('status-text').innerText = "Data berhasil disimpan ke Guru! ✅";
+                document.getElementById('status-text').style.color = "green";
+            })
+            .catch(error => {
+                document.getElementById('status-text').innerText = "Gagal kirim data.";
+                document.getElementById('status-text').style.color = "red";
+            });
+        }
+    </script>
+</body>
+</html>

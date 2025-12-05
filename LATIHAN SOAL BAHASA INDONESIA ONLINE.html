@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>LATIHAN SOAL BAHASA INDONESIA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #064e3b;
+            color: white;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .slide-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+            text-align: center;
+            position: relative;
+        }
+
+        @media (min-width: 768px) {
+            .slide-container { padding: 2rem; }
+        }
+
+        .option-box {
+            background: white;
+            color: #065f46;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            text-align: left;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+            border-left: 8px solid #fbbf24;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.1s, background-color 0.2s;
+            font-size: 1rem;
+        }
+        
+        @media (min-width: 768px) {
+            .option-box {
+                padding: 1.5rem;
+                font-size: 1.5rem;
+                border-left-width: 12px;
+            }
+        }
+
+        .option-box:active { transform: scale(0.98); }
+
+        @media (hover: hover) {
+            .option-box:hover {
+                transform: scale(1.01);
+                background-color: #fffbeb;
+            }
+        }
+
+        .option-box.correct {
+            background-color: #22c55e !important;
+            color: white !important;
+            border-left-color: #14532d !important;
+        }
+
+        .option-box.wrong {
+            background-color: #ef4444 !important;
+            color: white !important;
+            border-left-color: #7f1d1d !important;
+        }
+
+        .option-box.disabled { pointer-events: none; }
+
+        .option-label {
+            background: #fbbf24;
+            color: #064e3b;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 12px;
+            font-weight: 800;
+            flex-shrink: 0;
+            font-size: 1rem;
+        }
+
+        @media (min-width: 768px) {
+            .option-label {
+                width: 50px;
+                height: 50px;
+                font-size: 1.5rem;
+                margin-right: 20px;
+            }
+        }
+
+        #studentName {
+            width: 100%;
+            padding: 1rem;
+            font-size: 1.2rem;
+            border: 3px solid #34d399;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+            text-align: center;
+            font-weight: bold;
+            color: #059669; 
+        }
+
+        @media (min-width: 768px) {
+            #studentName {
+                font-size: 1.8rem;
+                padding: 1.5rem;
+            }
+        }
+
+        /* POPUP */
+        .feedback-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            font-weight: 900;
+            z-index: 9999;
+            pointer-events: none;
+            opacity: 0;
+            text-shadow: 3px 3px 10px rgba(0,0,0,0.5);
+            font-size: 8rem;
+        }
+
+        @media (min-width: 768px) {
+            .feedback-popup {
+                font-size: 15rem;
+                text-shadow: 5px 5px 15px rgba(0,0,0,0.5);
+            }
+        }
+
+        @keyframes popUpAnimation {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+        }
+
+        .animate-popup { animation: popUpAnimation 1s ease-out forwards; }
+
+        .text-green-popup { color: #4ade80; -webkit-text-stroke: 2px #064e3b; }
+        .text-red-popup { color: #f87171; -webkit-text-stroke: 2px #450a0a; }
+        
+        @media (min-width: 768px) {
+            .text-green-popup { -webkit-text-stroke: 4px #064e3b; }
+            .text-red-popup { -webkit-text-stroke: 4px #450a0a; }
+        }
+
+        .hidden { display: none !important; }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            color: #064e3b;
+            padding: 2rem 1.5rem;
+            border-radius: 1.5rem;
+            width: 100%;
+            max-width: 800px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+        
+        @media (min-width: 768px) {
+            .glass-card { padding: 3rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <audio id="sfx-correct" src="https://actions.google.com/sounds/v1/cartoon/cartoon_boing.ogg"></audio>
+    <audio id="sfx-wrong" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"></audio>
+
+    <div id="feedback-display" class="feedback-popup"></div>
+
+    <div id="start-screen" class="slide-container">
+        <div class="glass-card">
+            <h1 class="text-2xl md:text-5xl font-extrabold text-emerald-600 mb-2">LATIHAN SOAL<br>B. INDONESIA</h1>
+            <p class="text-sm md:text-lg text-gray-500 mb-6">Mode Online: Suara Aktif & Penilaian Otomatis</p>
+            <label class="block text-lg md:text-2xl font-bold mb-2">MASUKKAN NAMA SISWA:</label>
+            <input type="text" id="studentName" placeholder="Nama Lengkap..." autocomplete="off">
+            <button onclick="initQuiz()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 md:py-4 px-6 rounded-xl text-lg md:text-2xl shadow-lg transition transform hover:scale-105 mt-4 active:scale-95">
+                MULAI SEKARANG
+            </button>
+        </div>
+    </div>
+
+    <div id="quiz-screen" class="slide-container hidden">
+        <div class="w-full flex justify-between absolute top-0 left-0 p-4 md:p-8 text-sm md:text-xl font-bold text-emerald-200 bg-emerald-900 bg-opacity-50 md:bg-transparent z-10">
+            <span id="display-name" class="truncate max-w-[50%]">Siswa: -</span>
+            <span id="question-counter">Soal 1 / 50</span>
+        </div>
+
+        <div class="w-full flex flex-col items-center mt-12 md:mt-0 max-w-6xl">
+            <div id="category-badge" class="inline-block px-4 py-1 md:px-6 md:py-2 rounded-full text-sm md:text-xl font-bold bg-yellow-400 text-green-900 mb-4 shadow-md">
+                Materi
+            </div>
+            
+            <div id="question-text" class="text-xl md:text-4xl font-bold leading-tight md:leading-snug mb-6 md:mb-10 text-emerald-50 max-w-5xl">
+                Pertanyaan...
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6 w-full px-2 md:px-0" id="options-container">
+                </div>
+        </div>
+    </div>
+
+    <div id="end-screen" class="slide-container hidden">
+        <div class="glass-card">
+            <h1 class="text-3xl md:text-5xl font-extrabold text-emerald-600 mb-6">HASIL LATIHAN</h1>
+            <div class="text-left bg-gray-100 p-4 md:p-8 rounded-xl mb-6 text-lg md:text-2xl shadow-inner">
+                <p class="mb-3 border-b pb-2"><strong>Nama:</strong> <br><span id="res-name" class="text-gray-700">...</span></p>
+                <p class="mb-3 border-b pb-2"><strong>Skor Akhir:</strong> <br><span id="res-score" class="text-emerald-600 font-extrabold text-5xl">...</span></p>
+                <p><strong>Waktu:</strong> <br><span id="res-time" class="text-gray-700">...</span></p>
+            </div>
+            <div id="sending-status" class="text-base md:text-xl font-bold text-orange-500 mb-6 animate-pulse">
+                ⏳ Mengirim nilai ke Server...
+            </div>
+            <button onclick="location.reload()" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 md:py-4 px-6 rounded-xl text-lg md:text-xl shadow-lg active:scale-95 transition">
+                ULANGI DARI AWAL
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbzemnDvOmMz1rXt8dhD7BPoE9YitFU-QSFBkraVEQTKHbpLWCwy6dowKNZvnBjohI9l/exec";
+        
+        const rawQuestions = [
+            { c: "Kalimat Persuasif", q: "Kalimat yang bertujuan untuk mengajak atau membujuk pembaca disebut kalimat...", ans: "Persuasif", wr: ["Tanya", "Perintah", "Berita"] },
+            { c: "Kalimat Persuasif", q: "\"Ayo, kita jaga kebersihan kelas!\" Kalimat tersebut termasuk jenis kalimat...", ans: "Persuasif", wr: ["Deskripsi", "Narasi", "Interogatif"] },
+            { c: "Kalimat Persuasif", q: "Salah satu ciri kalimat persuasif adalah sering menggunakan kata...", ans: "Mari", wr: ["Apakah", "Kemarin", "Siapa"] },
+            { c: "Kalimat Persuasif", q: "Tujuan utama pembuatan poster layanan masyarakat adalah untuk...", ans: "Mengajak masyarakat melakukan sesuatu", wr: ["Menghias dinding jalan", "Membuat orang tertawa", "Menceritakan sejarah"] },
+            { c: "Kalimat Persuasif", q: "\"Buanglah sampah pada tempatnya!\" Kalimat ini biasanya ditemukan di...", ans: "Tempat umum", wr: ["Buku harian", "Kamus", "Surat pribadi"] },
+            { c: "Majas Personifikasi", q: "Majas yang melukiskan benda mati seolah-olah hidup dan memiliki sifat manusia disebut...", ans: "Personifikasi", wr: ["Hiperbola", "Metafora", "Simile"] },
+            { c: "Majas Personifikasi", q: "\"Ombak berkejar-kejaran di tepi pantai.\" Kalimat ini menggunakan majas...", ans: "Personifikasi", wr: ["Asosiasi", "Litotes", "Ironi"] },
+            { c: "Majas Personifikasi", q: "\"Daun kelapa melambai-lambai memanggil nelayan.\" Kata yang menunjukkan personifikasi adalah...", ans: "Melambai-lambai", wr: ["Daun kelapa", "Nelayan", "Memanggil"] },
+            { c: "Majas Personifikasi", q: "\"Matahari baru saja bangun dari tidurnya.\" Maksud kalimat tersebut adalah...", ans: "Matahari terbit", wr: ["Matahari terbenam", "Siang hari", "Mendung"] },
+            { c: "Majas Personifikasi", q: "Manakah di bawah ini yang merupakan kalimat bermajas personifikasi?", ans: "Angin berbisik di telingaku.", wr: ["Adik menangis tersedu-sedu.", "Ayah membaca koran.", "Bola itu berbentuk bulat."] },
+            { c: "Majas Personifikasi", q: "\"Hujan mengetuk jendela kamarku.\" Kalimat ini mengandung majas...", ans: "Personifikasi", wr: ["Metafora", "Hiperbola", "Repetisi"] },
+            { c: "Ide Pokok", q: "Kalimat utama yang terletak di akhir paragraf disebut paragraf...", ans: "Induktif", wr: ["Deduktif", "Campuran", "Naratif"] },
+            { c: "Ide Pokok", q: "Ide pendukung berfungsi untuk...", ans: "Menjelaskan ide pokok", wr: ["Menggantikan judul", "Mengakhiri bacaan", "Membuka percakapan"] },
+            { c: "Ide Pokok", q: "Dalam satu paragraf, biasanya terdapat berapa ide pokok?", ans: "Satu", wr: ["Dua", "Tiga", "Banyak"] },
+            { c: "Paragraf Deskripsi", q: "Paragraf yang menggambarkan objek dengan melibatkan panca indera disebut...", ans: "Deskripsi", wr: ["Narasi", "Persuasi", "Argumentasi"] },
+            { c: "Paragraf Deskripsi", q: "\"Bunga mawar itu berwarna merah merekah dan harum semerbak.\" Kalimat ini melibatkan indera...", ans: "Penglihatan dan Penciuman", wr: ["Pendengaran", "Peraba", "Perasa"] },
+            { c: "Paragraf Deskripsi", q: "Tujuan utama paragraf deskripsi adalah agar pembaca seolah-olah dapat...", ans: "Melihat dan merasakan sendiri objeknya", wr: ["Meyakini pendapat penulis", "Mengetahui langkah-langkah", "Terhibur dengan cerita lucu"] },
+            { c: "Transitif & Intransitif", q: "Kalimat transitif adalah kalimat yang memerlukan...", ans: "Objek", wr: ["Pelengkap", "Keterangan", "Subjek saja"] },
+            { c: "Transitif & Intransitif", q: "\"Adik menangis.\" Kalimat ini termasuk jenis kalimat...", ans: "Intransitif", wr: ["Transitif", "Majemuk", "Pasif"] },
+            { c: "Transitif & Intransitif", q: "\"Ibu membeli sayuran.\" Kata 'sayuran' berfungsi sebagai...", ans: "Objek", wr: ["Subjek", "Predikat", "Keterangan"] },
+            { c: "Alat Transportasi", q: "Delman dan becak adalah contoh alat transportasi...", ans: "Tradisional", wr: ["Modern", "Udara", "Laut"] },
+            { c: "Alat Transportasi", q: "Kapal feri dan perahu layar adalah alat transportasi yang bergerak di...", ans: "Air", wr: ["Darat", "Udara", "Rel"] },
+            { c: "Alat Transportasi", q: "Alat transportasi udara yang memiliki baling-baling besar di atasnya adalah...", ans: "Helikopter", wr: ["Pesawat Jet", "Balon Udara", "Roket"] },
+            { c: "Alat Transportasi", q: "Tempat pemberhentian kereta api disebut...", ans: "Stasiun", wr: ["Terminal", "Pelabuhan", "Bandara"] },
+            { c: "Alat Transportasi", q: "Bus, truk, dan sepeda motor termasuk alat transportasi...", ans: "Darat", wr: ["Laut", "Udara", "Sungai"] },
+            { c: "Awalan Ber-", q: "Kata dasar \"main\" jika diberi awalan ber- menjadi...", ans: "Bermain", wr: ["Bmain", "Bermainan", "Belmain"] },
+            { c: "Awalan Ber-", q: "\"Adik sedang (sepeda) di taman.\" Kata berimbuhan yang tepat untuk melengkapi kalimat adalah...", ans: "Bersepeda", wr: ["Mensepeda", "Tersepeda", "Disepeda"] },
+            { c: "Awalan Ber-", q: "Kata \"bekerja\" berasal dari kata dasar...", ans: "Kerja", wr: ["Ajar", "Eker", "Berja"] },
+            { c: "Awalan Ber-", q: "Awalan ber- pada kata \"bertopi\" memiliki makna...", ans: "Memakai", wr: ["Melakukan", "Menjadi", "Jumlah"] },
+            { c: "Awalan Ber-", q: "Penulisan kata berimbuhan yang benar untuk kata dasar \"ajar\" adalah...", ans: "Belajar", wr: ["Berajar", "Mengajar", "Pelajar"] },
+            { c: "Denotatif & Konotatif", q: "\"Rina adalah bintang kelas di sekolahnya.\" Kata 'bintang' bermakna...", ans: "Konotatif (Kiasan)", wr: ["Denotatif (Sebenarnya)", "Benda langit", "Artis"] },
+            { c: "Denotatif & Konotatif", q: "\"Ibu membeli buah apel di pasar.\" Kata 'buah' di sini bermakna...", ans: "Denotatif", wr: ["Konotatif", "Anak", "Hasil karya"] },
+            { c: "Denotatif & Konotatif", q: "\"Pejabat itu takut kehilangan kursinya.\" Kata 'kursi' bermakna konotatif yaitu...", ans: "Jabatan/Kekuasaan", wr: ["Tempat duduk", "Perabot rumah", "Kayu jati"] },
+            { c: "Ide Pokok", q: "Kalimat utama dalam sebuah paragraf biasanya memuat...", ans: "Ide pokok", wr: ["Kalimat penjelas", "Latar belakang", "Kesimpulan"] },
+            { c: "Ide Pokok", q: "Paragraf yang kalimat utamanya terletak di awal disebut paragraf...", ans: "Deduktif", wr: ["Induktif", "Campuran", "Narasi"] },
+            { c: "Ide Pokok", q: "Fungsi dari kalimat penjelas adalah...", ans: "Menjelaskan kalimat utama", wr: ["Mengakhiri paragraf", "Menyimpulkan isi", "Membuka percakapan"] },
+            { c: "Ide Pokok", q: "Gagasan yang menjadi dasar pengembangan sebuah paragraf disebut...", ans: "Ide pokok", wr: ["Kalimat tanya", "Judul", "Tema"] },
+            { c: "Ide Pokok", q: "Membaca sekilas untuk menemukan informasi tertentu disebut...", ans: "Membaca memindai", wr: ["Membaca nyaring", "Membaca puisi", "Membaca dongeng"] },
+            { c: "Struktur SPOK", q: "Ibu memasak nasi di dapur. Kata 'memasak' berkedudukan sebagai...", ans: "Predikat", wr: ["Subjek", "Objek", "Keterangan"] },
+            { c: "Struktur SPOK", q: "Adik bermain bola. Pola kalimat tersebut adalah...", ans: "S-P-O", wr: ["S-P-K", "S-P", "S-O-P"] },
+            { c: "Struktur SPOK", q: "Ayah (S) membaca (P) koran (O) di teras (K). Yang merupakan Objek adalah...", ans: "Koran", wr: ["Ayah", "Membaca", "Di teras"] },
+            { c: "Majemuk Setara", q: "Adik ingin membeli permen, ... uangnya tidak cukup. Kata hubung yang tepat adalah...", ans: "Tetapi", wr: ["Dan", "Atau", "Lalu"] },
+            { c: "Majemuk Setara", q: "Ayah pergi ke kantor dan Ibu pergi ke pasar. Ini kalimat majemuk setara...", ans: "Sejalan/Penjumlahan", wr: ["Berlawanan", "Pemilihan", "Sebab akibat"] },
+            { c: "Majemuk Setara", q: "Kamu mau minum teh ... kopi? Kata hubung yang tepat adalah...", ans: "Atau", wr: ["Dan", "Tetapi", "Melainkan"] },
+            { c: "Awalan Me-", q: "Kata dasar 'sapu' jika diberi awalan me- menjadi...", ans: "Menyapu", wr: ["Mensapu", "Mesapu", "Mengsapu"] },
+            { c: "Awalan Me-", q: "Kata 'tulis' jika diberi awalan me- menjadi...", ans: "Menulis", wr: ["Mentulis", "Metulis", "Mengtulis"] },
+            { c: "Awalan Me-", q: "Awalan me- pada kata 'menggoda' memiliki makna...", ans: "Melakukan pekerjaan", wr: ["Membuat jadi", "Mencari", "Menuju ke"] },
+            { c: "Homonim", q: "Kata 'bisa' memiliki dua arti, yaitu...", ans: "Mampu dan Zat racun ular", wr: ["Mampu dan Mau", "Racun dan Madu", "Pandai dan Cerdas"] },
+            { c: "Homonim", q: "Adik jatuh di 'kali' dekat rumah. Kakak sedang belajar perkalian 'kali'. Kata 'kali' termasuk...", ans: "Homonim", wr: ["Sinonim", "Antonim", "Akronim"] },
+            { c: "Homonim", q: "Kata 'genting' bisa berarti atap rumah, bisa juga berarti...", ans: "Gawat/Darurat", wr: ["Penting", "Kaca", "Lantai"] }
+        ];
+
+        let activeQuestions = [];
+        let currentIndex = 0;
+        let score = 0;
+        let userName = "";
+        let startTime, endTime;
+        let isProcessing = false;
+
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex != 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        function speak(text) {
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = "id-ID";
+            const voices = window.speechSynthesis.getVoices();
+            const femaleVoice = voices.find(v => v.lang.includes('id') && v.name.toLowerCase().includes('female')) ||
+                                voices.find(v => v.lang.includes('id'));
+            if(femaleVoice) utterance.voice = femaleVoice;
+            utterance.rate = 1.0; 
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function initQuiz() {
+            const nameInput = document.getElementById("studentName");
+            userName = nameInput.value.trim();
+            if (userName === "") {
+                alert("Mohon isi nama siswa.");
+                return;
+            }
+            const elem = document.documentElement;
+            if (elem.requestFullscreen) { elem.requestFullscreen().catch(err=>{}); }
+
+            document.getElementById("display-name").innerText = "Siswa: " + userName;
+            startTime = new Date();
+
+            const shuffledMaster = shuffle([...rawQuestions]);
+            activeQuestions = shuffledMaster.map((item, index) => {
+                let optionsArr = [
+                    { text: item.ans, isCorrect: true },
+                    { text: item.wr[0], isCorrect: false },
+                    { text: item.wr[1], isCorrect: false },
+                    { text: item.wr[2], isCorrect: false }
+                ];
+                optionsArr = shuffle(optionsArr);
+                return {
+                    id: index + 1,
+                    category: item.c,
+                    question: item.q,
+                    options: optionsArr
+                };
+            });
+
+            currentIndex = 0;
+            score = 0;
+            document.getElementById("start-screen").classList.add("hidden");
+            document.getElementById("quiz-screen").classList.remove("hidden");
+            renderSlide();
+        }
+
+        function renderSlide() {
+            isProcessing = false;
+            const currentData = activeQuestions[currentIndex];
+            const labels = ['A', 'B', 'C', 'D'];
+
+            document.getElementById("question-counter").innerText = `Soal ${currentIndex + 1} / ${activeQuestions.length}`;
+            document.getElementById("category-badge").innerText = currentData.category;
+            
+            const qText = document.getElementById("question-text");
+            qText.innerText = currentData.question;
+
+            const container = document.getElementById("options-container");
+            container.innerHTML = "";
+            
+            let ttsString = currentData.question + ". ";
+            currentData.options.forEach((opt, idx) => {
+                const box = document.createElement("div");
+                box.className = "option-box";
+                box.onclick = () => checkAnswer(box, opt.isCorrect, idx);
+                box.innerHTML = `<div class="option-label">${labels[idx]}</div><span>${opt.text}</span>`;
+                box.dataset.correct = opt.isCorrect;
+                container.appendChild(box);
+                ttsString += labels[idx] + ". " + opt.text + ". ";
+            });
+            speak(ttsString);
+        }
+
+        function checkAnswer(selectedBox, isCorrect, index) {
+            if (isProcessing) return;
+            isProcessing = true;
+            window.speechSynthesis.cancel();
+            const allOptions = document.querySelectorAll('.option-box');
+            allOptions.forEach(box => box.classList.add('disabled'));
+
+            const popup = document.getElementById("feedback-display");
+            popup.classList.remove("animate-popup");
+            void popup.offsetWidth;
+
+            if (isCorrect) {
+                selectedBox.classList.add('correct');
+                document.getElementById('sfx-correct').play();
+                score++;
+                popup.innerText = "+1";
+                popup.className = "feedback-popup text-green-popup animate-popup";
+            } else {
+                selectedBox.classList.add('wrong');
+                document.getElementById('sfx-wrong').play();
+                allOptions.forEach(box => {
+                    if (box.dataset.correct === "true") box.classList.add('correct');
+                });
+                popup.innerText = "0";
+                popup.className = "feedback-popup text-red-popup animate-popup";
+            }
+
+            setTimeout(() => {
+                if (currentIndex < activeQuestions.length - 1) {
+                    currentIndex++;
+                    renderSlide();
+                } else {
+                    finishQuiz();
+                }
+            }, 1000);
+        }
+
+        // ==========================================
+        // PERUBAHAN UTAMA: PENGHITUNGAN SKOR AKHIR
+        // ==========================================
+        function finishQuiz() {
+            endTime = new Date();
+            const timeDiff = Math.floor((endTime - startTime) / 1000);
+            const minutes = Math.floor(timeDiff / 60);
+            const seconds = timeDiff % 60;
+            const timeString = `${minutes} Menit ${seconds} Detik`;
+
+            // HITUNG SKOR AKHIR DIKALI 2
+            const finalScoreValue = score * 2; 
+
+            document.getElementById("quiz-screen").classList.add("hidden");
+            document.getElementById("end-screen").classList.remove("hidden");
+            if (document.exitFullscreen) { document.exitFullscreen().catch(err=>{}); }
+
+            document.getElementById("res-name").innerText = userName;
+            // Tampilkan Skor Akhir (0 - 100)
+            document.getElementById("res-score").innerText = finalScoreValue;
+            document.getElementById("res-time").innerText = timeString;
+
+            // Kirim Skor Akhir (bukan skor mentah) ke Google Sheet
+            sendDataToSheet(userName, finalScoreValue, timeString);
+        }
+
+        function sendDataToSheet(name, finalScore, timeTaken) {
+            const statusDiv = document.getElementById("sending-status");
+            const payload = { nama: name, skor: finalScore, waktu: timeTaken };
+
+            fetch(SHEET_API_URL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            })
+            .then(() => {
+                statusDiv.innerHTML = "✅ NILAI TERKIRIM!";
+                statusDiv.classList.remove("text-orange-500", "animate-pulse");
+                statusDiv.classList.add("text-green-600");
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                statusDiv.innerText = "⚠️ Gagal Mengirim (Cek Internet)";
+                statusDiv.classList.remove("text-orange-500");
+                statusDiv.classList.add("text-red-500");
+            });
+        }
+
+        document.getElementById("studentName").addEventListener("keypress", function(e) {
+            if (e.key === "Enter") initQuiz();
+        });
+        window.speechSynthesis.getVoices();
+    </script>
+</body>
+</html>
